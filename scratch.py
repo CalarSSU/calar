@@ -1,22 +1,20 @@
 import json
 import requests
+import icalendar
+#Нужно получать все токены с сайта
 
+def GetRequest (tokenDepartment, tokenEducation, tokenGroup):
+    return requests.get("https://scribabot.tk/api/v1.0/schedule/" 
+            + tokenEducation + "/" + tokenDepartment + "/" + str(tokenGroup))
 
-def GetJson(tokenDepartment, tokenGroup): #Нужно получать эти токены с сайта
-    getString = "https://scribabot.tk/api/v1.0/schedule/extramural/" + tokenDepartment + "/" + str(tokenGroup)
-    return json.loads(requests.get(getString).text)
+def GetJson(tokenDepartment, tokenEducation, tokenGroup):
+    getString = GetRequest(tokenDepartment, tokenEducation, tokenGroup)
+    return json.loads(getString.text)
 
-# def SaveJson(jsonData, fileName):
-    # with open(file=fileName+ '.json', mode='w') as file:
-        # file.write(jsonData) переписать через реквесты
-
-
-# getDepartment = input("Department: ")
-# getGroup = input("Group : ")
-# todos = json.loads(response.text)
-# print(todos == response.json()) # True
-# print(response.json())
-# with open("test.json","w") as file:
-#   file.write(jsonData.text)
-# with open("data.json", "w") as file:
-#     file.write(requests.get(getString).text)
+def SaveFile(requestData, fileName , extention):
+        if extention == ".ics":
+            with open(file=fileName + extention, mode='wb') as file:
+                file.write(requestData.to_ical())
+        else:
+            with open(file=fileName + extention, mode='w') as file:
+                file.write(requestData.text) 
