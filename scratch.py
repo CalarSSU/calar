@@ -18,3 +18,7 @@ def SaveFile(requestData, fileName , extention):
         else:
             with open(file=fileName + extention, mode='w') as file:
                 file.write(requestData.text) 
+
+
+    # scratch.SaveFile(scratch.GetRequest(Department, Education, Group),
+    #                 "timetable/"+ Department + '_' + str(Group), '.json')
