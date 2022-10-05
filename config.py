@@ -1,0 +1,6 @@
+UPDATE_FREQUENCY_IN_SECONDS = 86_400
+
+LESSON_TYPES = {
+    "PRACTICE" : "(П)",
+    "LECTURE" : "(Л)"
+}
