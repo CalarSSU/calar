@@ -1,22 +1,26 @@
 import json
 import requests
+import icalendar
+import os
 
 
-def GetJson(tokenDepartment, tokenGroup): #Нужно получать эти токены с сайта
-    getString = "https://scribabot.tk/api/v1.0/schedule/extramural/" + tokenDepartment + "/" + str(tokenGroup)
-    return json.loads(requests.get(getString).text)
-
-# def SaveJson(jsonData, fileName):
-    # with open(file=fileName+ '.json', mode='w') as file:
-        # file.write(jsonData) переписать через реквесты
+def GetRequest(tokenDepartment, tokenEducation, tokenGroup):
+    return requests.get("https://scribabot.tk/api/v1.0/schedule/" +
+                        tokenEducation + "/" + tokenDepartment + "/" +
+                        tokenGroup)
 
 
-# getDepartment = input("Department: ")
-# getGroup = input("Group : ")
-# todos = json.loads(response.text)
-# print(todos == response.json()) # True
-# print(response.json())
-# with open("test.json","w") as file:
-#   file.write(jsonData.text)
-# with open("data.json", "w") as file:
-#     file.write(requests.get(getString).text)
+def GetJson(tokenDepartment, tokenEducation, tokenGroup):
+    getString = GetRequest(tokenDepartment, tokenEducation, tokenGroup)
+    return json.loads(getString.text)
+
+
+def SaveFile(requestData, filePath):
+    folder = filePath.rsplit('/', maxsplit=1)[0]
+    os.makedirs(folder, exist_ok=True)
+    if filePath.split('.')[-1] == 'ics':
+        with open(file=filePath, mode='wb') as file:
+            file.write(requestData.to_ical())
+    else:
+        with open(file=filePath, mode='w') as file:
+            file.write(requestData.text)
