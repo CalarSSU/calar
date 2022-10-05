@@ -31,3 +31,17 @@ def incDateByNum(date: (int, int, int), days: int) -> (int, int, int):
     else:
         return incDateByNum((date[0], date[1] + 1, 1),
                             days - daysInMonth(date) + date[2] - 1)
+
+
+def decDateByNum(date: (int, int, int), days: int) -> (int, int, int):
+    year, month, day = date
+    pMonth = month - 1
+    restDays = days - day
+
+    if days < day:
+        return (year, month, day - days)
+    elif month == 1:
+        return decDateByNum((year - 1, 12, 31), restDays)
+    else:
+        return decDateByNum((year, pMonth, daysInMonth(year, pMonth, 1)),
+                            restDays)

@@ -9,7 +9,7 @@ def convert(jsonData, educationType, subGroup):
     firstSeptember = date(curDate.year, 9, 1)
     nom = (int(date.strftime(curDate, '%U')) -
            int(date.strftime(firstSeptember, '%U'))) % 2 == 0
-    day = datetime.weekday(curDate) + 1
+    weekday = datetime.weekday(curDate) + 1
     iCal = icalendar.Calendar()
     iCal.add(
         'prodid', '-//Calar - a schedule that is always at hand : project '
@@ -33,8 +33,13 @@ def convert(jsonData, educationType, subGroup):
                         event['teacher']['patronymic'])
             iEvent.add('description', iTeacher)
             iEvent.add('location', event['place'])
-            eventDate = incDateByNum((curDate.year, curDate.month, curDate.day),
-                                     int(event['day']['dayNumber']) - day)
+            diffDays = int(event['day']['dayNumber']) - weekday
+            if diffDays > 0:
+                eventDate = incDateByNum(
+                    (curDate.year, curDate.month, curDate.day), diffDays)
+            else:
+                eventDate = decDateByNum(
+                    (curDate.year, curDate.month, curDate.day), -diffDays)
             iEvent.add(
                 'dtstart',
                 datetime(eventDate[0], eventDate[1], eventDate[2],
