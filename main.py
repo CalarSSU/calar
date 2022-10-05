@@ -1,7 +1,10 @@
 import icalendar
+import json
+from datetime import date, datetime, tzinfo, timedelta
 
 from scratch import *
-from date import *
+
+UPDATE_FREQUENCY_IN_SECONDS = 86_400
 
 
 def convert(jsonData, educationType, subGroup):
@@ -34,22 +37,17 @@ def convert(jsonData, educationType, subGroup):
             iEvent.add('description', iTeacher)
             iEvent.add('location', event['place'])
             diffDays = int(event['day']['dayNumber']) - weekday
-            if diffDays > 0:
-                eventDate = incDateByNum(
-                    (curDate.year, curDate.month, curDate.day), diffDays)
-            else:
-                eventDate = decDateByNum(
-                    (curDate.year, curDate.month, curDate.day), -diffDays)
+            eventDate = curDate + timedelta(days=diffDays)
             iEvent.add(
                 'dtstart',
-                datetime(eventDate[0], eventDate[1], eventDate[2],
-                         int(event['lessonTime']['hourStart']),
-                         int(event['lessonTime']['minuteStart']), 0))
+                datetime(eventDate.year, eventDate.month, eventDate.day,
+                         event['lessonTime']['hourStart'],
+                         event['lessonTime']['minuteStart'], 0))
             iEvent.add(
                 'dtend',
-                datetime(eventDate[0], eventDate[1], eventDate[2],
-                         int(event['lessonTime']['hourEnd']),
-                         int(event['lessonTime']['minuteEnd']), 0))
+                datetime(eventDate.year, eventDate.month, eventDate.day,
+                         event['lessonTime']['hourEnd'],
+                         event['lessonTime']['minuteEnd'], 0))
             iCal.add_component(iEvent)
     return iCal
 
@@ -59,13 +57,15 @@ def main():
     Group = '351'
     Education = 'full'
     SubGroup = '1'
-    data = GetJson(Department, Education, Group)
-    ical = convert(data, Education, SubGroup)
     fileName = Department + '_' + Group
+    jsonPath = "json/" + fileName + '.json'
+    iСalPath = "calendar/" + fileName + '.ics'
 
-    SaveFile(ical, "calendar/" + fileName + '.ics')
-    SaveFile(GetRequest(Department, Education, Group),
-             "json/" + fileName + '.json')
+    jsonData = getJson(Department, Education, Group)
+    saveFile(jsonData, jsonPath)
+
+    iCal = convert(jsonData, Education, SubGroup)
+    saveFile(iCal, iСalPath)
 
 
 if __name__ == "__main__":
