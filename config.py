@@ -13,3 +13,4 @@ SEMESTER_TIME = {
         "end": "31.05"
     },
 }
+

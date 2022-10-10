@@ -1,11 +1,10 @@
 import icalendar
-import json
-from datetime import date, datetime, tzinfo, timedelta
+from datetime import date, datetime, timedelta
 
 from config import *
 
 
-def json_to_ical(jsonData, educationType, subGroup):
+def json_to_ical(jsonData, subGroup):
     iCal = icalendar.Calendar()
     iCal.add(
         'prodid', '-//Calar - a schedule that is always at hand : project '
@@ -26,13 +25,13 @@ def json_to_ical(jsonData, educationType, subGroup):
 
         curDate = date(date.today().year, startMonth, startDay)
         while curDate < endDate:
-            fill_event(iCal, jsonData, curDate, event, subGroup)
+            fill_event(iCal, curDate, event)
             curDate += timedelta(weeks=1)
 
     return iCal
 
 
-def fill_event(iCal, jsonData, curDate, event, subGroup):
+def fill_event(iCal, curDate, event):
     firstSeptember = date(curDate.year, 9, 1)
     isNom = (int(date.strftime(curDate, '%U')) -
              int(date.strftime(firstSeptember, '%U'))) % 2 == 0
@@ -63,3 +62,4 @@ def fill_event(iCal, jsonData, curDate, event, subGroup):
                      event['lessonTime']['hourEnd'],
                      event['lessonTime']['minuteEnd'], 0))
         iCal.add_component(iEvent)
+

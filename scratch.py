@@ -1,6 +1,5 @@
 import json
 import requests
-import icalendar
 import os
 
 
@@ -24,3 +23,4 @@ def saveFile(requestData, filePath):
     else:
         with open(file=filePath, mode='w') as file:
             json.dump(requestData, file, ensure_ascii=False)
+

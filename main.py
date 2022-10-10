@@ -1,7 +1,4 @@
 import argparse
-import icalendar
-import json
-from datetime import date, datetime, timedelta
 
 from scratch import *
 from config import *
@@ -39,9 +36,10 @@ def main():
     jsonData = getJson(cfg.d, cfg.f, cfg.g)
     saveFile(jsonData, jsonPath)
 
-    iCal = json_to_ical(jsonData, cfg.f, cfg.s)
+    iCal = json_to_ical(jsonData, cfg.s)
     saveFile(iCal, iСalPath)
 
 
 if __name__ == "__main__":
     main()
+
