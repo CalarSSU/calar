@@ -6,7 +6,7 @@ CUR_SEMESTER = 1
 SEMESTER_TIME = {
     1: {
         "start": "1.09",
-        "end": "31.12"
+        "end": "21.12"
     },
     2: {
         "start": "1.02",

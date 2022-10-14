@@ -20,7 +20,7 @@ def json_to_ical(jsonData, subGroup):
     for event in jsonData['lessons']:
         isCorrectSubGroup = (event['subGroup'] == ''
                              or event['subGroup'].split()[0] == subGroup
-                             or event['subGroup'].split()[0] == 'с')
+                             or event['subGroup'].split()[0].isalpha())
         if not isCorrectSubGroup:
             continue
 
