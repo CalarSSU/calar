@@ -16,6 +16,7 @@ def json_to_ical(jsonData, subGroup):
                                SEMESTER_TIME[CUR_SEMESTER]['start'].split('.'))
     endDay, endMonth = map(int, SEMESTER_TIME[CUR_SEMESTER]['end'].split('.'))
     endDate = date(date.today().year, endMonth, endDay)
+    startDate = date(date.today().year, startMonth, startDay)
     for event in jsonData['lessons']:
         isCorrectSubGroup = (event['subGroup'] == ''
                              or event['subGroup'].split()[0] == subGroup
@@ -23,15 +24,15 @@ def json_to_ical(jsonData, subGroup):
         if not isCorrectSubGroup:
             continue
 
-        curDate = date(date.today().year, startMonth, startDay)
+        curDate = startDate
         while curDate < endDate:
-            fill_event(iCal, curDate, event)
+            fill_event(iCal, curDate, event, startDate, endDate)
             curDate += timedelta(weeks=1)
 
     return iCal
 
 
-def fill_event(iCal, curDate, event):
+def fill_event(iCal, curDate, event, startDate, endDate):
     firstSeptember = date(curDate.year, 9, 1)
     isNom = (int(date.strftime(curDate, '%U')) -
              int(date.strftime(firstSeptember, '%U'))) % 2 == 0
@@ -51,6 +52,9 @@ def fill_event(iCal, curDate, event):
         iEvent.add('location', event['place'])
         diffDays = event['day']['dayNumber'] - weekday
         eventDate = curDate + timedelta(days=diffDays)
+        if not startDate < eventDate < endDate:
+            return
+
         iEvent.add(
             'dtstart',
             datetime(eventDate.year, eventDate.month, eventDate.day,

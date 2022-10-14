@@ -29,15 +29,16 @@ def main():
                         default='1')
     cfg = parser.parse_args()
 
-    fileName = cfg.d + '_' + cfg.g
-    jsonPath = "json/" + fileName + '.json'
-    iСalPath = "calendar/" + fileName + '.ics'
+    for group in cfg.g.split():
+        fileName = cfg.d + '_' + group
+        jsonPath = "json/" + fileName + '.json'
+        iСalPath = "calendar/" + fileName + '.ics'
 
-    jsonData = getJson(cfg.d, cfg.f, cfg.g)
-    saveFile(jsonData, jsonPath)
+        jsonData = getJson(cfg.d, cfg.f, group)
+        saveFile(jsonData, jsonPath)
 
-    iCal = json_to_ical(jsonData, cfg.s)
-    saveFile(iCal, iСalPath)
+        iCal = json_to_ical(jsonData, cfg.s)
+        saveFile(iCal, iСalPath)
 
 
 if __name__ == "__main__":
