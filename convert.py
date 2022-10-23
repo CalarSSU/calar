@@ -19,6 +19,7 @@ def json_to_ical(jsonData, subGroup):
     startDate = date(date.today().year, startMonth, startDay)
     for event in jsonData['lessons']:
         isCorrectSubGroup = (event['subGroup'] == ''
+                             or subGroup == ''
                              or event['subGroup'].split()[0] == subGroup
                              or event['subGroup'].split()[0].isalpha())
         if not isCorrectSubGroup:
