@@ -1,72 +1,73 @@
-import icalendar
+import argparse
+from curses.ascii import isdigit
 
 from scratch import *
-from date import *
-
-
-def convert(jsonData, educationType, subGroup):
-    curDate = date.today()
-    firstSeptember = date(curDate.year, 9, 1)
-    nom = (int(date.strftime(curDate, '%U')) -
-           int(date.strftime(firstSeptember, '%U'))) % 2 == 0
-    weekday = datetime.weekday(curDate) + 1
-    iCal = icalendar.Calendar()
-    iCal.add(
-        'prodid', '-//Calar - a schedule that is always at hand : project '
-        'within the course of programming technology at SSU University//'
-        'example.com//')
-    iCal.add('version', '2.0')
-    for event in jsonData['lessons']:
-        isCorrectSubGroup = (event['subGroup'] == ''
-                             or event['subGroup'].split()[0] == subGroup
-                             or event['subGroup'].split()[0] == 'с')
-        isNom = (event['weekType'] == 'FULL'
-                 or event['weekType'] == 'DENOM' and not nom
-                 or event['weekType'] == 'NOM' and nom)
-        if isCorrectSubGroup and isNom:
-            iEvent = icalendar.Event()
-            iEvent.add('name', event['name'])
-            iEvent.add('summary',
-                       event['name'] + '({0})'.format(event['lessonType'][0]))
-            iTeacher = (event['teacher']['surname'] + " " +
-                        event['teacher']['name'] + " " +
-                        event['teacher']['patronymic'])
-            iEvent.add('description', iTeacher)
-            iEvent.add('location', event['place'])
-            diffDays = int(event['day']['dayNumber']) - weekday
-            if diffDays > 0:
-                eventDate = incDateByNum(
-                    (curDate.year, curDate.month, curDate.day), diffDays)
-            else:
-                eventDate = decDateByNum(
-                    (curDate.year, curDate.month, curDate.day), -diffDays)
-            iEvent.add(
-                'dtstart',
-                datetime(eventDate[0], eventDate[1], eventDate[2],
-                         int(event['lessonTime']['hourStart']),
-                         int(event['lessonTime']['minuteStart']), 0))
-            iEvent.add(
-                'dtend',
-                datetime(eventDate[0], eventDate[1], eventDate[2],
-                         int(event['lessonTime']['hourEnd']),
-                         int(event['lessonTime']['minuteEnd']), 0))
-            iCal.add_component(iEvent)
-    return iCal
+from config import *
+from convert import *
 
 
 def main():
-    Department = 'knt'
-    Group = '351'
-    Education = 'full'
-    SubGroup = '1'
-    data = GetJson(Department, Education, Group)
-    ical = convert(data, Education, SubGroup)
-    fileName = Department + '_' + Group
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d',
+                        metavar='DEPARTMENT',
+                        help='choose department',
+                        type=str,
+                        default='knt')
+    parser.add_argument('-f',
+                        metavar='FORM',
+                        help='choose education form',
+                        type=str,
+                        default='full')
+    parser.add_argument('-g',
+                        metavar='GROUP',
+                        help='choose group',
+                        type=str,
+                        default='')
+    parser.add_argument('-s',
+                        metavar='SUBGROUP',
+                        help='choose subgroup',
+                        type=str,
+                        default='')
+    parser.add_argument('-i',
+                        help='save results into DATA_DIR from config',
+                        action=argparse.BooleanOptionalAction)
+    cfg = parser.parse_args()
 
-    SaveFile(ical, "calendar/" + fileName + '.ics')
-    SaveFile(GetRequest(Department, Education, Group),
-             "json/" + fileName + '.json')
+    prefix = './'
+    if cfg.i:
+        prefix = DATA_DIR
+
+    if cfg.g == '':
+        cfg.g = GROUPS[cfg.d][MAP_FORM[cfg.f]]
+
+    for group in cfg.g.split():
+        jsonData = getJson(cfg.d, cfg.f, group)
+
+        if cfg.s == '':
+            cfg.s = get_subgroups(jsonData) + " 0"
+
+        for sg in cfg.s.split():
+            if sg == '0':
+                sg = ''
+
+            iСalPath = \
+                f'{prefix}/calendars/{cfg.d}/{MAP_FORM[cfg.f]}/{group}x{sg}.ics'
+
+            iCal = json_to_ical(jsonData, sg)
+            saveFile(iCal, iСalPath)
+        cfg.s = ''
+
+
+def get_subgroups(jsonData):
+    subgrops = set()
+    for event in jsonData['lessons']:
+        sg = str(event['subGroup']).strip()
+        if sg != '':
+            if isdigit(sg[0]):
+                subgrops.add(sg[0])
+    return " ".join(subgrops)
 
 
 if __name__ == "__main__":
     main()
+
