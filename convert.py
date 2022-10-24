@@ -18,8 +18,7 @@ def json_to_ical(jsonData, subGroup):
     endDate = date(date.today().year, endMonth, endDay)
     startDate = date(date.today().year, startMonth, startDay)
     for event in jsonData['lessons']:
-        isCorrectSubGroup = (event['subGroup'] == ''
-                             or subGroup == ''
+        isCorrectSubGroup = (event['subGroup'] == '' or subGroup == ''
                              or event['subGroup'].split()[0] == subGroup
                              or event['subGroup'].split()[0].isalpha())
         if not isCorrectSubGroup:
@@ -52,11 +51,11 @@ def fill_event(iCal, curDate, event, startDate, endDate):
 
     iEvent = icalendar.Event()
     iEvent.add('name', event['name'])
-    iEvent.add('summary',
-               subGroupMention + event['name'] + ' ' + LESSON_TYPES[event["lessonType"]])
-    iTeacher = (event['teacher']['surname'] + " " +
-                event['teacher']['name'] + " " +
-                event['teacher']['patronymic'])
+    iEvent.add(
+        'summary', subGroupMention + event['name'] + ' ' +
+        LESSON_TYPES[event["lessonType"]])
+    iTeacher = (event['teacher']['surname'] + " " + event['teacher']['name'] +
+                " " + event['teacher']['patronymic'])
     iEvent.add('description', iTeacher)
     iEvent.add('location', event['place'])
     diffDays = event['day']['dayNumber'] - weekday
@@ -75,4 +74,3 @@ def fill_event(iCal, curDate, event, startDate, endDate):
                  event['lessonTime']['hourEnd'],
                  event['lessonTime']['minuteEnd'], 0))
     iCal.add_component(iEvent)
-
