@@ -50,11 +50,11 @@ def main():
             if sg == '0':
                 sg = ''
 
-            iСalPath = \
+            iCalPath = \
                 f'{prefix}/calendars/{cfg.d}/{MAP_FORM[cfg.f]}/{group}x{sg}.ics'
 
             iCal = json_to_ical(jsonData, sg)
-            saveFile(iCal, iСalPath)
+            saveFile(iCal, iCalPath)
         cfg.s = ''
 
 
@@ -70,4 +70,3 @@ def get_subgroups(jsonData):
 
 if __name__ == "__main__":
     main()
-
