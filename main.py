@@ -1,5 +1,6 @@
 import argparse
-from curses.ascii import isdigit
+import time
+import threading
 
 from scratch import *
 from config import *
@@ -31,31 +32,55 @@ def main():
     parser.add_argument('-i',
                         help='save results into DATA_DIR from config',
                         action=argparse.BooleanOptionalAction)
+    parser.add_argument('-j',
+                        help='run in multiple threads',
+                        action=argparse.BooleanOptionalAction)
     cfg = parser.parse_args()
 
     prefix = './'
     if cfg.i:
         prefix = DATA_DIR
-
     if cfg.g == '':
         cfg.g = GROUPS[cfg.d][MAP_FORM[cfg.f]]
 
+    if cfg.j:
+        run_multi_thread(cfg, prefix)
+    else:
+        run_single_thread(cfg, prefix)
+
+
+def run_single_thread(cfg, prefix):
     for group in cfg.g.split():
-        jsonData = getJson(cfg.d, cfg.f, group)
+        process_group(cfg, group, prefix)
 
-        if cfg.s == '':
-            cfg.s = get_subgroups(jsonData) + " 0"
 
-        for sg in cfg.s.split():
-            if sg == '0':
-                sg = ''
+def run_multi_thread(cfg, prefix):
+    threads = []
+    for group in cfg.g.split():
+        th = threading.Thread(target=process_group, args=(cfg, group, prefix))
+        th.start()
+        threads.append(th)
+    for th in threads:
+        th.join()
+            
 
-            iCalPath = \
-                f'{prefix}/calendars/{cfg.d}/{MAP_FORM[cfg.f]}/{group}x{sg}.ics'
-
-            iCal = json_to_ical(jsonData, sg)
-            saveFile(iCal, iCalPath)
+def process_group(cfg, group, prefix):
+    jsonData = getJson(cfg.d, cfg.f, group)
+    
+    if cfg.s == '':
+        cfg.s = get_subgroups(jsonData) + " 0"
+        
+    for sg in cfg.s.split():
+        if sg == '0':
+            sg = ''
+            
+        iCalPath = \
+            f'{prefix}/calendars/{cfg.d}/{MAP_FORM[cfg.f]}/{group}x{sg}.ics'
+        
+        iCal = json_to_ical(jsonData, sg)
+        saveFile(iCal, iCalPath)
         cfg.s = ''
+        
 
 
 def get_subgroups(jsonData):
@@ -63,7 +88,7 @@ def get_subgroups(jsonData):
     for event in jsonData['lessons']:
         sg = str(event['subGroup']).strip()
         if sg != '':
-            if isdigit(sg[0]):
+            if sg[0].isdigit():
                 subgrops.add(sg[0])
     return " ".join(subgrops)
 
