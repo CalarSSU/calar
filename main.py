@@ -42,21 +42,11 @@ def main():
     if cfg.g == '':
         cfg.g = GROUPS[cfg.d][MAP_FORM[cfg.f]]
 
-    if cfg.j:
-        run_multi_process(cfg, prefix)
-    else:
-        run_single_process(cfg, prefix)
-
-
-def run_single_process(cfg, prefix):
     for group in cfg.g.split():
-        process_group(cfg, group, prefix)
-
-
-def run_multi_process(cfg, prefix):
-    for group in cfg.g.split():
-        th = Process(target=process_group, args=(cfg, group, prefix))
-        th.start()
+        if cfg.j:
+            Process(target=process_group, args=(cfg, group, prefix)).start()
+        else:
+            process_group(cfg, group, prefix)
 
 
 def process_group(cfg, group, prefix):
