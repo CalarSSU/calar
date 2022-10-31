@@ -1,6 +1,5 @@
 import argparse
-import time
-import threading
+from multiprocessing import Process
 
 from scratch import *
 from config import *
@@ -44,43 +43,39 @@ def main():
         cfg.g = GROUPS[cfg.d][MAP_FORM[cfg.f]]
 
     if cfg.j:
-        run_multi_thread(cfg, prefix)
+        run_multi_process(cfg, prefix)
     else:
-        run_single_thread(cfg, prefix)
+        run_single_process(cfg, prefix)
 
 
-def run_single_thread(cfg, prefix):
+def run_single_process(cfg, prefix):
     for group in cfg.g.split():
         process_group(cfg, group, prefix)
 
 
-def run_multi_thread(cfg, prefix):
-    threads = []
+def run_multi_process(cfg, prefix):
     for group in cfg.g.split():
-        th = threading.Thread(target=process_group, args=(cfg, group, prefix))
+        th = Process(target=process_group, args=(cfg, group, prefix))
         th.start()
-        threads.append(th)
-    for th in threads:
-        th.join()
-            
+
 
 def process_group(cfg, group, prefix):
     jsonData = getJson(cfg.d, cfg.f, group)
-    
+
     if cfg.s == '':
         cfg.s = get_subgroups(jsonData) + " 0"
-        
+
     for sg in cfg.s.split():
         if sg == '0':
             sg = ''
-            
+
         iCalPath = \
             f'{prefix}/calendars/{cfg.d}/{MAP_FORM[cfg.f]}/{group}x{sg}.ics'
-        
+
         iCal = json_to_ical(jsonData, sg)
         saveFile(iCal, iCalPath)
         cfg.s = ''
-        
+
 
 
 def get_subgroups(jsonData):
